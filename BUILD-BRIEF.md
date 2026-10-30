@@ -47,3 +47,6 @@ else yields to this close.
 - [ ] Builder Center article drafted + published
 - [ ] Demo video < 3 min recorded + public
 - [ ] Submission completed on the owner's Builder account
+## Pattern
+
+This entry executes the D0 prerequisite-practice template (owner framing, 2026-10-30): agent + one new tool + article + demo, per the D0 completion package's shape.
