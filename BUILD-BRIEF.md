@@ -19,10 +19,12 @@ Climate resilience). StudySprint sits in Education.
 ## Hard qualifier (enforced)
 
 The free Strands workshop must be completed in-window (Oct 28 – Nov 4,
-2026) on the owner's Builder account. Evidence = completion badge +
-certificate on the profile's Badges tab, dated in-window; the
-challenge-entries lane verifies the badge on the public profile.
-**No in-window workshop evidence ⇒ no submission.**
+2026) on the owner's Builder account. Evidence of record (corrected
+2026-10-30): the platform issues no badge/certificate for this
+workshop — evidence = the Workshop Studio "Workshop Complete!" page
++ per-module execution receipts, dated in-window.
+**No in-window workshop evidence ⇒ no submission.** Satisfied
+2026-10-30.
 
 Workshop: "Building AI Agents with Strands SDK: From Simple Loops to
 Multi-Agent Swarms" (free sandbox; 8h from activation, one per week).
@@ -42,11 +44,11 @@ else yields to this close.
 
 ## Build checklist
 
-- [ ] Workshop completed in-window; badge evidence captured
-- [ ] Strands agent implemented (agent.py) + offline tests
-- [ ] Builder Center article drafted + published
-- [ ] Demo video < 3 min recorded + public
-- [ ] Submission completed on the owner's Builder account
+- [x] Workshop completed in-window 2026-10-30 (all 7 modules EXIT:0; platform issues no badge/cert — evidence = "Workshop Complete!" page + execution receipts, coordinator gate D1-WORKSHOP cleared, PR #2580)
+- [x] Strands agent implemented (agent.py) + offline tests (5 passed)
+- [x] Builder Center article drafted (article.md) — [ ] published (platform seam, entries lane Builder session)
+- [x] Demo scripted + run, receipts in evidence/demo-run.json — [ ] video < 3 min recorded + public (platform seam)
+- [ ] Submission completed on the owner's Builder account (platform seam, after article + video)
 ## Pattern
 
 This entry executes the D0 prerequisite-practice template (owner framing, 2026-10-30): agent + one new tool + article + demo, per the D0 completion package's shape.
