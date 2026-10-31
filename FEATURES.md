@@ -72,9 +72,27 @@ feature below serves that screen or the daily loop around it.
   Rapid Serial Visual Presentation reader in the UX layer —
   read the syllabus/chapter *fast* (wpm ramp, fixation-point
   highlighting, chunking) before the plan/quiz loop; Fovea +
-  Reedy = the named references. Observatory census + MOAR
-  asked 2026-10-30; parameters/comprehension evidence fold in
-  when it lands — Next
+  Reedy = the named references. Census 2026-10-30 (Observatory):
+  **∅ in-index (0/3,639)** — clean-slate surface, nothing held.
+  Templates (MOAR): **primusread** (TS, MIT, ★539 — fixation-
+  point reader, best web-stack template), **speeedy** (TS, MIT —
+  local-first RSVP for PDF/EPUB, closest to chapter-PDF intake),
+  Reedy-for-Chrome itself (GPL-2.0 ⇒ concepts only, ¬ code),
+  LetoReader (chunking + pacing), stutter (embeddable player).
+  **Fovea = the technique, not a repo** (NOT ESTABLISHED as a
+  public project): foveal anchoring — eye fixed at one point,
+  words presented there; Spritz's ORP is the canonical form.
+  UX spec (copy): ORP anchor ≈⅓ into the word, never moving ·
+  wpm ramp 200–250 → user target, per-user saved · punctuation-
+  + length-aware dwell (flat fixed-rate = the failure mode) ·
+  chunk 1 → 2–3 words as wpm rises · pause/resume + 10-word
+  rewind + progress (rewind replaces eye regression).
+  UX spec (avoid): RSVP never the *only* pass over dense text —
+  comprehension holds ≈400–500 wpm on easy text, drops on new/
+  complex material, >600 wpm = scanning ¬ reading. StudySprint
+  mitigation built into the loop: RSVP = intake pass, the
+  plan/quiz immediately tests it, paragraph-mode fallback for
+  dense sections — Next
 - ○ "Explain it back" voice/text answer → agent checks against the
   topic and stamps what was missed — Later
 - ○ Gentle nudges (push/SMS) at the student's chosen hour, quiet
