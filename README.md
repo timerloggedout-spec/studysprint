@@ -26,6 +26,12 @@ kinds, same stamped-evidence shape).
 | `examples/` | Sample syllabus + practice set (synthetic) |
 | `tests/test_studysprint.py` | 5 offline tests |
 
+## Live assets
+
+- Article (Builder Center): https://builder.aws.com/content/3LRJhGucOZfz9ydzFax8sD2p5yB/studysprint-a-study-plan-you-can-trust-built-with-the-strands-agents-sdk
+- Demo video (YouTube, 1:10, public): https://www.youtube.com/watch?v=N3HBRV4LOGQ
+- Starting-agent (D0) repo: https://github.com/timerloggedout-spec/delphi-oracle
+
 ## Run it
 
 ```bash
