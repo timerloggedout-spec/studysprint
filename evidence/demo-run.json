@@ -18,8 +18,8 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T01:40:48Z",
-        "receipt_sha256": "009f61ac30a3751a1229041ca541df9557a8120aabd5f375bb1569b31236cc19"
+        "generated_at": "2026-10-31T02:04:54Z",
+        "receipt_sha256": "355a06b71cbcdbf20b1176aee8d28976804511377d4aacdc9aed8ff4c972e844"
       }
     },
     {
@@ -36,8 +36,8 @@
             "kind": "syllabus",
             "ref": "examples/syllabus.json"
           },
-          "assembled_at": "2026-10-31T01:40:48Z",
-          "fresh_until": "2026-10-31T01:55:48Z",
+          "assembled_at": "2026-10-31T02:04:54Z",
+          "fresh_until": "2026-10-31T02:19:54Z",
           "items": [
             {
               "claim": "syllabus.course",
@@ -45,9 +45,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "da171ec35ebfa07e4a2cf1a1e22e9be1b009b79fa04f5990659b7e6e5ba39fad"
             },
             {
@@ -56,9 +56,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "0e8ca5c02283afab21c1e59940c6307d13ab91fd66c15354652a05f40360a756"
             },
             {
@@ -70,9 +70,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "a9e10313a6ddf019e44f03f79f17381336c84e21e44f53f343e4640a2e0e8045"
             },
             {
@@ -81,9 +81,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "1251ebd726491c6b312396a4757b0bdcce70a2b3d43b51ff386b3fca479473b3"
             },
             {
@@ -95,9 +95,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "497670e8a6b78a61b51f535ede4409775ae931f3e3956bfefcb87e0659f1e835"
             },
             {
@@ -106,9 +106,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "81f4f9c814dd8a1f70fbd00d212a35dcfefb0681ef198a3c0c9dc11bc5441120"
             },
             {
@@ -120,9 +120,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "78abca5399478c1a205b1636ef8f45997fadf72d730363f61368f1579f4a00d9"
             },
             {
@@ -131,9 +131,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "42f294ce2d4d3090cfa70c1bf357e00ed1db47c33b4b8590afa33373ff7c81d2"
             }
           ],
@@ -350,8 +350,8 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T01:40:48Z",
-        "receipt_sha256": "bb912da9add8967e4356aa23c25433afefed657a629d474a446733c0d5dc84be"
+        "generated_at": "2026-10-31T02:04:54Z",
+        "receipt_sha256": "03e09554e98509ef0bac02e7364752af485481225dd142edfa9326c69e9cfed7"
       }
     },
     {
@@ -368,8 +368,8 @@
             "kind": "syllabus",
             "ref": "examples/syllabus.json"
           },
-          "assembled_at": "2026-10-31T01:40:48Z",
-          "fresh_until": "2026-10-31T01:55:48Z",
+          "assembled_at": "2026-10-31T02:04:54Z",
+          "fresh_until": "2026-10-31T02:19:54Z",
           "items": [
             {
               "claim": "syllabus.course",
@@ -377,9 +377,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "da171ec35ebfa07e4a2cf1a1e22e9be1b009b79fa04f5990659b7e6e5ba39fad"
             },
             {
@@ -388,9 +388,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "0e8ca5c02283afab21c1e59940c6307d13ab91fd66c15354652a05f40360a756"
             },
             {
@@ -402,9 +402,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "a9e10313a6ddf019e44f03f79f17381336c84e21e44f53f343e4640a2e0e8045"
             },
             {
@@ -413,9 +413,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "1251ebd726491c6b312396a4757b0bdcce70a2b3d43b51ff386b3fca479473b3"
             },
             {
@@ -427,9 +427,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "497670e8a6b78a61b51f535ede4409775ae931f3e3956bfefcb87e0659f1e835"
             },
             {
@@ -438,9 +438,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "81f4f9c814dd8a1f70fbd00d212a35dcfefb0681ef198a3c0c9dc11bc5441120"
             },
             {
@@ -452,9 +452,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "78abca5399478c1a205b1636ef8f45997fadf72d730363f61368f1579f4a00d9"
             },
             {
@@ -463,9 +463,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T01:40:48Z"
+                "observed_at": "2026-10-31T02:04:54Z"
               },
-              "fresh_until": "2026-10-31T01:55:48Z",
+              "fresh_until": "2026-10-31T02:19:54Z",
               "sha256": "42f294ce2d4d3090cfa70c1bf357e00ed1db47c33b4b8590afa33373ff7c81d2"
             }
           ],
@@ -479,8 +479,8 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T01:40:48Z",
-        "receipt_sha256": "9df947dd286eceda9c569ac73be37284a12e3f79dc47456f25064031946538e8"
+        "generated_at": "2026-10-31T02:04:54Z",
+        "receipt_sha256": "a034427514c622364cf33bb13a437de91521442ff512851bca62fdd506b27f84"
       }
     }
   ]
