@@ -45,7 +45,18 @@ feature below serves that screen or the daily loop around it.
 - ○ Daily check-in (30 seconds): done / partial / missed per
   session → feeds re-plan; streaks shown as *recovered weeks*,
   never as broken chains — **Now** (data model), Next (UI)
-- ○ Spaced repetition: quiz misses resurface at 1d / 3d / 7d — Next
+- ○ Spaced repetition: quiz misses resurface on FSRS intervals
+  (retrievability-targeted; the 1d / 3d / 7d ladder stays only as
+  the cold-start fallback) — Next. Seed census 2026-10-30
+  (Observatory lane, signals ¬ adoption orders; spot-verified by
+  this seat via PAT API): scheduler = **py-fsrs** (MIT, ★519 —
+  StudySprint's stack is Python; ts-fsrs, MIT ★838, if a TS/web
+  UI lands), .apkg interop = genanki (MIT, ★2,776, already an
+  index dependency-candidate), bridge = anki-connect (live-Anki
+  sync only), card/UX refs = orbit, carden, memo. Already ours:
+  forks of fsrs4anki, fsrs4anki-helper, anki-llm, AnkiAIUtils,
+  AnkiconnectAndroid. Algorithm ruling: default FSRS (Anki's own
+  built-in since 23.10), SM-2 = legacy fallback only.
 - ○ "Explain it back" voice/text answer → agent checks against the
   topic and stamps what was missed — Later
 - ○ Gentle nudges (push/SMS) at the student's chosen hour, quiet
