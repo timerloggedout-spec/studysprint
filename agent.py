@@ -45,6 +45,18 @@ from study_tools import (  # noqa: E402
 RECEIPT_SCHEMA = "studysprint-agent-receipt/v1"
 
 
+def _agent_version() -> str:
+    """Version of record: the repo-root VERSION file (VERSIONING.md)."""
+    try:
+        return (Path(__file__).resolve().parent / "VERSION") \
+            .read_text().strip()
+    except OSError:
+        return "unknown"
+
+
+AGENT_VERSION = _agent_version()
+
+
 def build_strands_agent():
     """Register StudySprint's tools on a Strands Agent when available.
 
@@ -142,6 +154,7 @@ def run_agent(request: dict, now: datetime | None = None,
 
     receipt = {
         "schema": RECEIPT_SCHEMA,
+        "agent_version": AGENT_VERSION,
         "request_id": request["id"],
         "action": request["action"],
         "decision_on_asserted_evidence": decision_asserted,
