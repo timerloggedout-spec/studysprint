@@ -131,6 +131,14 @@ def run_agent(request: dict, now: datetime | None = None,
                 quiz = generate_quiz(doc, first_week)
             if request.get("missed_week") is not None:
                 replan = replan_on_missed(plan, request["missed_week"])
+        elif decision_final == "ALLOW_RECOMMENDATION" and \
+                request["artifact"]["kind"] == "practice_set":
+            doc = evidence_set["document"]
+            quiz = {"topic": doc.get("topic"),
+                    "questions": [{"topic": doc.get("topic"),
+                                   "prompt": q.get("q"),
+                                   "answer": q.get("a")}
+                                  for q in doc.get("questions") or []]}
 
     receipt = {
         "schema": RECEIPT_SCHEMA,
