@@ -55,6 +55,18 @@ def test_agent_plans_on_fetched_syllabus():
     assert r["deployment"] is False
 
 
+def test_agent_quiz_from_practice_set():
+    r = run_agent({"id": "t4", "action": "draft", "asserted": True,
+                   "artifact": {"kind": "practice_set",
+                                "ref": "examples/practice_set.json"}},
+                  now=NOW, root=ROOT)
+    assert r["decision_final"] == "ALLOW_RECOMMENDATION"
+    assert r["plan"] is None
+    assert r["quiz"]["topic"] == "cell structure"
+    assert len(r["quiz"]["questions"]) == 2
+    assert r["quiz"]["questions"][0]["answer"].startswith("Controls")
+
+
 def test_agent_escalates_consequential():
     r = run_agent({"id": "t3", "action": "credential_mutation",
                    "risk_tier": "consequential", "asserted": True,
