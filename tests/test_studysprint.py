@@ -67,6 +67,14 @@ def test_agent_quiz_from_practice_set():
     assert r["quiz"]["questions"][0]["answer"].startswith("Controls")
 
 
+def test_receipt_carries_version_of_record():
+    r = run_agent({"id": "t5", "action": "draft", "asserted": True},
+                  now=NOW, root=ROOT)
+    version_file = (ROOT / "VERSION").read_text().strip()
+    assert r["agent_version"] == version_file
+    assert r["agent_version"] == "0.1.0"
+
+
 def test_agent_escalates_consequential():
     r = run_agent({"id": "t3", "action": "credential_mutation",
                    "risk_tier": "consequential", "asserted": True,
