@@ -49,14 +49,32 @@ feature below serves that screen or the daily loop around it.
   (retrievability-targeted; the 1d / 3d / 7d ladder stays only as
   the cold-start fallback) — Next. Seed census 2026-10-30
   (Observatory lane, signals ¬ adoption orders; spot-verified by
-  this seat via PAT API): scheduler = **py-fsrs** (MIT, ★519 —
-  StudySprint's stack is Python; ts-fsrs, MIT ★838, if a TS/web
-  UI lands), .apkg interop = genanki (MIT, ★2,776, already an
+  this seat via PAT API). **Stacks are multi-lingual by design
+  (owner correction 2026-10-30): we take templates + concepts and
+  adapt them — language is not a filter.** Seeds: scheduler =
+  **py-fsrs** (MIT, ★519) for the Python agent core ∧ **ts-fsrs**
+  (MIT, ★838) for the TS UX layer we need anyhow — both, not
+  either/or; .apkg interop = genanki (MIT, ★2,776, already an
   index dependency-candidate), bridge = anki-connect (live-Anki
   sync only), card/UX refs = orbit, carden, memo. Already ours:
   forks of fsrs4anki, fsrs4anki-helper, anki-llm, AnkiAIUtils,
-  AnkiconnectAndroid. Algorithm ruling: default FSRS (Anki's own
-  built-in since 23.10), SM-2 = legacy fallback only.
+  AnkiconnectAndroid.
+  Algorithm note (corrected 2026-10-30): SM-2 is not a footnote —
+  it is Anki's long-standing default-scheduler lineage and lives
+  on in its scheduler/plugin ecosystem; "Anki shipped it" argues
+  nothing by itself, for either side. The FSRS case rests on the
+  merits: a DSR memory model with per-user optimized weights and
+  retention-targeted intervals, benchmarked against SM-2-class
+  schedulers by the open-spaced-repetition org. Default = FSRS;
+  SM-2 stays a legitimate simple/predictable baseline — and the
+  comparison baseline in our own evals.
+- ○ RSVP speed-reading (owner-added 2026-10-30): a Reedy-style
+  Rapid Serial Visual Presentation reader in the UX layer —
+  read the syllabus/chapter *fast* (wpm ramp, fixation-point
+  highlighting, chunking) before the plan/quiz loop; Fovea +
+  Reedy = the named references. Observatory census + MOAR
+  asked 2026-10-30; parameters/comprehension evidence fold in
+  when it lands — Next
 - ○ "Explain it back" voice/text answer → agent checks against the
   topic and stamps what was missed — Later
 - ○ Gentle nudges (push/SMS) at the student's chosen hour, quiet
