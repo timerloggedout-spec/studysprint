@@ -73,5 +73,7 @@ standalone, and the receipt says which.
 ## Repo + demo
 
 Public repo: https://github.com/timerloggedout-spec/studysprint
+Starting-agent (D0) repo: https://github.com/timerloggedout-spec/delphi-oracle
+Demo video (1:10, public): https://www.youtube.com/watch?v=N3HBRV4LOGQ
 Demo: under 3 minutes, scripted in `demo-script.md`, runnable as
 `demo.py`, receipts in `evidence/demo-run.json`.
