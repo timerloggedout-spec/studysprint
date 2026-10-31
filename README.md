@@ -32,6 +32,12 @@ kinds, same stamped-evidence shape).
 - Demo video (YouTube, 1:10, public): https://www.youtube.com/watch?v=N3HBRV4LOGQ
 - Starting-agent (D0) repo: https://github.com/timerloggedout-spec/delphi-oracle
 
+## Product + process
+
+- `FEATURES.md` — features a user would want, UI/UX principles, roadmap
+- `VERSIONING.md` + `VERSION` + `CHANGELOG.md` — SemVer process;
+  1.0.0 = the Nov 4 submission release
+
 ## Run it
 
 ```bash
