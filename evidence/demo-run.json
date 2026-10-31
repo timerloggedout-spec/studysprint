@@ -5,6 +5,7 @@
       "narration": "Plan my BIO 101 study \u2014 the student asserts the course topics, no syllabus file named.",
       "receipt": {
         "schema": "studysprint-agent-receipt/v1",
+        "agent_version": "0.1.0",
         "request_id": "no-evidence",
         "action": "draft",
         "decision_on_asserted_evidence": "ABSTAIN",
@@ -18,14 +19,15 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T02:04:54Z",
-        "receipt_sha256": "355a06b71cbcdbf20b1176aee8d28976804511377d4aacdc9aed8ff4c972e844"
+        "generated_at": "2026-10-31T02:14:56Z",
+        "receipt_sha256": "a4172ecdfde3737c5aaa90eb32eb557f9ea6a3d96c863e11543360d30ad020ee"
       }
     },
     {
       "narration": "Same request, syllabus file named: fetch_study_evidence stamps it, the gate allows, the plan + quiz are built, and missed week 1 is re-planned.",
       "receipt": {
         "schema": "studysprint-agent-receipt/v1",
+        "agent_version": "0.1.0",
         "request_id": "fetched-syllabus",
         "action": "draft",
         "decision_on_asserted_evidence": "ABSTAIN",
@@ -36,8 +38,8 @@
             "kind": "syllabus",
             "ref": "examples/syllabus.json"
           },
-          "assembled_at": "2026-10-31T02:04:54Z",
-          "fresh_until": "2026-10-31T02:19:54Z",
+          "assembled_at": "2026-10-31T02:14:56Z",
+          "fresh_until": "2026-10-31T02:29:56Z",
           "items": [
             {
               "claim": "syllabus.course",
@@ -45,9 +47,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "da171ec35ebfa07e4a2cf1a1e22e9be1b009b79fa04f5990659b7e6e5ba39fad"
             },
             {
@@ -56,9 +58,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "0e8ca5c02283afab21c1e59940c6307d13ab91fd66c15354652a05f40360a756"
             },
             {
@@ -70,9 +72,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "a9e10313a6ddf019e44f03f79f17381336c84e21e44f53f343e4640a2e0e8045"
             },
             {
@@ -81,9 +83,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "1251ebd726491c6b312396a4757b0bdcce70a2b3d43b51ff386b3fca479473b3"
             },
             {
@@ -95,9 +97,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "497670e8a6b78a61b51f535ede4409775ae931f3e3956bfefcb87e0659f1e835"
             },
             {
@@ -106,9 +108,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "81f4f9c814dd8a1f70fbd00d212a35dcfefb0681ef198a3c0c9dc11bc5441120"
             },
             {
@@ -120,9 +122,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "78abca5399478c1a205b1636ef8f45997fadf72d730363f61368f1579f4a00d9"
             },
             {
@@ -131,9 +133,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "42f294ce2d4d3090cfa70c1bf357e00ed1db47c33b4b8590afa33373ff7c81d2"
             }
           ],
@@ -350,14 +352,15 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T02:04:54Z",
-        "receipt_sha256": "03e09554e98509ef0bac02e7364752af485481225dd142edfa9326c69e9cfed7"
+        "generated_at": "2026-10-31T02:14:56Z",
+        "receipt_sha256": "8adacc284c56a8f3c1a7707a43334dc16822afb797716f872ffc0c22fa3c642d"
       }
     },
     {
       "narration": "A credential-mutation request with fetched, material evidence \u2014 the class rule still escalates.",
       "receipt": {
         "schema": "studysprint-agent-receipt/v1",
+        "agent_version": "0.1.0",
         "request_id": "credential",
         "action": "credential_mutation",
         "decision_on_asserted_evidence": "ESCALATE",
@@ -368,8 +371,8 @@
             "kind": "syllabus",
             "ref": "examples/syllabus.json"
           },
-          "assembled_at": "2026-10-31T02:04:54Z",
-          "fresh_until": "2026-10-31T02:19:54Z",
+          "assembled_at": "2026-10-31T02:14:56Z",
+          "fresh_until": "2026-10-31T02:29:56Z",
           "items": [
             {
               "claim": "syllabus.course",
@@ -377,9 +380,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "da171ec35ebfa07e4a2cf1a1e22e9be1b009b79fa04f5990659b7e6e5ba39fad"
             },
             {
@@ -388,9 +391,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "0e8ca5c02283afab21c1e59940c6307d13ab91fd66c15354652a05f40360a756"
             },
             {
@@ -402,9 +405,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "a9e10313a6ddf019e44f03f79f17381336c84e21e44f53f343e4640a2e0e8045"
             },
             {
@@ -413,9 +416,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "1251ebd726491c6b312396a4757b0bdcce70a2b3d43b51ff386b3fca479473b3"
             },
             {
@@ -427,9 +430,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "497670e8a6b78a61b51f535ede4409775ae931f3e3956bfefcb87e0659f1e835"
             },
             {
@@ -438,9 +441,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "81f4f9c814dd8a1f70fbd00d212a35dcfefb0681ef198a3c0c9dc11bc5441120"
             },
             {
@@ -452,9 +455,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "78abca5399478c1a205b1636ef8f45997fadf72d730363f61368f1579f4a00d9"
             },
             {
@@ -463,9 +466,9 @@
               "provenance": {
                 "source": "local-file",
                 "path": "examples/syllabus.json",
-                "observed_at": "2026-10-31T02:04:54Z"
+                "observed_at": "2026-10-31T02:14:56Z"
               },
-              "fresh_until": "2026-10-31T02:19:54Z",
+              "fresh_until": "2026-10-31T02:29:56Z",
               "sha256": "42f294ce2d4d3090cfa70c1bf357e00ed1db47c33b4b8590afa33373ff7c81d2"
             }
           ],
@@ -479,8 +482,8 @@
         },
         "strands_agent_available": false,
         "deployment": false,
-        "generated_at": "2026-10-31T02:04:54Z",
-        "receipt_sha256": "a034427514c622364cf33bb13a437de91521442ff512851bca62fdd506b27f84"
+        "generated_at": "2026-10-31T02:14:56Z",
+        "receipt_sha256": "44e01a737f4e27520be09de8ad7e50a6dfbc63f8572cf9c5adc479d527d3b9e5"
       }
     }
   ]
