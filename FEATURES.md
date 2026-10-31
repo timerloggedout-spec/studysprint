@@ -31,26 +31,47 @@ direct-PDF chapter reading as the reading experience.
   author), find the book — PDF / EPUB / web edition — from legal
   open sources and the student's own library access; present the
   found edition for one-tap confirm (never plan from an unconfirmed
-  edition — the evidence rule applies to books too) — Next
+  edition — the evidence rule applies to books too) — Next.
+  Census 2026-10-30 (Observatory): ∅ in index; the finders are
+  APIs, not repos — OpenStax catalog API, archive.org
+  AdvancedSearch, OpenLibrary (ISBN + covers), DOAB/OAPEN
+  OAI-PMH feeds (quotas to verify at build).
 - ○ **User uploads, any form**: PDF / EPUB / docs ∧ **photos and
   scans** of physical pages → OCR → the same structured pipeline
-  (a photographed chapter is a first-class chapter) — Next
+  (a photographed chapter is a first-class chapter) — Next.
+  Refs: MinerU (PDF→structured markdown/JSON, ★82,831),
+  tesseract (Apache-2.0) / PaddleOCR (Apache-2.0, ★92k) for
+  OCR; an owned WebSend scanner fork already exists in-index.
 - ○ **Structure extraction**: chapters → sections from the TOC;
   every reading assignment maps to chapter + section ranges, not
-  page blobs — Next
+  page blobs — Next. Closest fit of record: GROBID (Apache-2.0,
+  ★5,205 — scholarly structure: TOC/sections/references + NER);
+  MinerU covers the TOC/structure half for general PDFs.
 - ○ **Index + Glossary mining**: search the book's back-of-book
   Index and Glossary *by chapter* → a per-chapter term bank
   (term, glossary definition, index page refs, the sections it
   appears in). This term bank is the spine: it feeds term
-  emphasis, quiz generation, SR cards, and flagging — Next
+  emphasis, quiz generation, SR cards, and flagging — Next.
+  Extraction ≈ keyphrase class: KeyBERT (MIT, ★4,224) for
+  per-chapter candidates, grobid-ner for entity-grade terms.
 - ○ **Term Emphasis in every view**: glossary/index terms render
   emphasized wherever they appear (plan, reader, quiz); tap a
-  term → its definition, its sections, its SR card — Next
+  term → its definition, its sections, its SR card — Next.
+  ∅ purpose-built in index; UX pattern of record =
+  obsidian-lexis (highlights known terms, atomic cards on tap);
+  the hypothes.is selector substrate doubles as the highlight
+  layer.
 - ○ **Hypothes.is layer**: annotations, highlights and selections
   via hypothes.is — the student's customizations live in an open
   annotation layer (portable, not locked in our app), and a
   hypothes.is selection can become a flag / term / card in one
-  tap — Next
+  tap — Next. **Strongest-covered surface in the census**:
+  hypothesis/client is *already ours* (owned fork
+  timerloggedout-spec/client_fork, fork note "Agentic Teams",
+  verified firsthand) + pdf.js-hypothes.is starred (annotate the
+  PDF directly); h (API) + via (proxy) = MOAR; annotations are
+  W3C Web Annotation JSON-LD — highlight→structured-data is
+  native to the model, not a scrape.
 
 ## 2. The plan (the core screen)
 - ✓ Week-by-week plan: learn + retrieve block per topic
