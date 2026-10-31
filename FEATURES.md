@@ -14,7 +14,6 @@ feature below serves that screen or the daily loop around it.
 - ✓ Syllabus file → verified evidence set → plan (`study_tools`)
 - ○ PDF syllabus upload + parse (the concept's original input;
   today = structured JSON) — **Next**
-- ○ Photo/screenshot of a paper syllabus → OCR → same pipeline — Later
 - ◐ Trust receipt before planning: the UI shows *what was fetched*
   (course, weeks, due dates, hash) and only plans after the student
   confirms — the evidence gate made visible — **Now** (receipt data
@@ -22,6 +21,36 @@ feature below serves that screen or the daily loop around it.
 - ○ Paste-a-link intake (LMS page / Google Doc) — Next
 - ○ Multi-course intake: 4–5 syllabi → one merged calendar with
   conflict flags (two midterms, same week) — **Next, high value**
+
+## 1b. Reading pipeline (owner design, 2026-10-30)
+The syllabus makes the *plan*; the assigned readings are the
+*material*. Optimized options only — two anti-patterns ruled out
+by the owner: ✗ speed-reading the syllabus itself, ✗ raw
+direct-PDF chapter reading as the reading experience.
+- ○ **Auto finder**: given the syllabus's texts (title / ISBN /
+  author), find the book — PDF / EPUB / web edition — from legal
+  open sources and the student's own library access; present the
+  found edition for one-tap confirm (never plan from an unconfirmed
+  edition — the evidence rule applies to books too) — Next
+- ○ **User uploads, any form**: PDF / EPUB / docs ∧ **photos and
+  scans** of physical pages → OCR → the same structured pipeline
+  (a photographed chapter is a first-class chapter) — Next
+- ○ **Structure extraction**: chapters → sections from the TOC;
+  every reading assignment maps to chapter + section ranges, not
+  page blobs — Next
+- ○ **Index + Glossary mining**: search the book's back-of-book
+  Index and Glossary *by chapter* → a per-chapter term bank
+  (term, glossary definition, index page refs, the sections it
+  appears in). This term bank is the spine: it feeds term
+  emphasis, quiz generation, SR cards, and flagging — Next
+- ○ **Term Emphasis in every view**: glossary/index terms render
+  emphasized wherever they appear (plan, reader, quiz); tap a
+  term → its definition, its sections, its SR card — Next
+- ○ **Hypothes.is layer**: annotations, highlights and selections
+  via hypothes.is — the student's customizations live in an open
+  annotation layer (portable, not locked in our app), and a
+  hypothes.is selection can become a flag / term / card in one
+  tap — Next
 
 ## 2. The plan (the core screen)
 - ✓ Week-by-week plan: learn + retrieve block per topic
@@ -68,31 +97,37 @@ feature below serves that screen or the daily loop around it.
   schedulers by the open-spaced-repetition org. Default = FSRS;
   SM-2 stays a legitimate simple/predictable baseline — and the
   comparison baseline in our own evals.
-- ○ RSVP speed-reading (owner-added 2026-10-30): a Reedy-style
-  Rapid Serial Visual Presentation reader in the UX layer —
-  read the syllabus/chapter *fast* (wpm ramp, fixation-point
-  highlighting, chunking) before the plan/quiz loop; Fovea +
-  Reedy = the named references. Census 2026-10-30 (Observatory):
-  **∅ in-index (0/3,639)** — clean-slate surface, nothing held.
-  Templates (MOAR): **primusread** (TS, MIT, ★539 — fixation-
-  point reader, best web-stack template), **speeedy** (TS, MIT —
-  local-first RSVP for PDF/EPUB, closest to chapter-PDF intake),
-  Reedy-for-Chrome itself (GPL-2.0 ⇒ concepts only, ¬ code),
-  LetoReader (chunking + pacing), stutter (embeddable player).
-  **Fovea = the technique, not a repo** (NOT ESTABLISHED as a
-  public project): foveal anchoring — eye fixed at one point,
-  words presented there; Spritz's ORP is the canonical form.
+- ○ RSVP **multi-pass reading** (owner-shaped 2026-10-30): RSVP
+  is not how a syllabus gets read (anti-pattern, §1b) and not a
+  single pass over raw PDF either — it runs **section by
+  section, in passes**: pass 1 = very fast skim (high wpm —
+  get the shape of the section), pass 2+ = slower, focused
+  re-reads of the same section. **During any pass the student
+  flags sections and terms/concepts** — a flag is one tap and
+  lands in the term bank (§1b), the SR deck, and the quiz focus
+  list; hypothes.is selections flag the same way. References:
+  **Fovea** — a real Android app (Google Play
+  com.revolvotech.fovea, "Fovea - RSVP Spritz E-Reader",
+  verified firsthand 2026-10-30: adjustable WPM, pause/rewind/
+  resume, paste-text, works on PDFs + study text, focus/ADHD
+  positioning) ∧ Reedy (Chrome). Census 2026-10-30
+  (Observatory): ∅ in-index (0/3,639) as *repos* — Fovea lives
+  on the Play store, not GitHub. Templates (MOAR):
+  **primusread** (TS, MIT, ★539 — fixation-point reader, best
+  web-stack template), **speeedy** (TS, MIT — local-first RSVP
+  for PDF/EPUB), Reedy-for-Chrome (GPL-2.0 ⇒ concepts only,
+  ¬ code), LetoReader (chunking + pacing), stutter (embeddable
+  player).
   UX spec (copy): ORP anchor ≈⅓ into the word, never moving ·
-  wpm ramp 200–250 → user target, per-user saved · punctuation-
-  + length-aware dwell (flat fixed-rate = the failure mode) ·
-  chunk 1 → 2–3 words as wpm rises · pause/resume + 10-word
-  rewind + progress (rewind replaces eye regression).
-  UX spec (avoid): RSVP never the *only* pass over dense text —
-  comprehension holds ≈400–500 wpm on easy text, drops on new/
-  complex material, >600 wpm = scanning ¬ reading. StudySprint
-  mitigation built into the loop: RSVP = intake pass, the
-  plan/quiz immediately tests it, paragraph-mode fallback for
-  dense sections — Next
+  per-pass wpm (skim fast, re-read slow), per-user saved ·
+  punctuation- + length-aware dwell (flat fixed-rate = the
+  failure mode) · chunk 1 → 2–3 words as wpm rises · pause/
+  resume + 10-word rewind + progress (rewind replaces eye
+  regression) · **flag control always under the thumb**.
+  UX spec (avoid): the single-pass reading of dense text —
+  comprehension holds ≈400–500 wpm on easy text and drops on
+  new/complex material; the multi-pass shape is the fix, and
+  paragraph mode stays available per section — Next
 - ○ "Explain it back" voice/text answer → agent checks against the
   topic and stamps what was missed — Later
 - ○ Gentle nudges (push/SMS) at the student's chosen hour, quiet
