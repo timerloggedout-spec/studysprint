@@ -1,0 +1,151 @@
+name: release-cut
+
+# Generalized surface release cut (issue #4455 seam 3, generalizing
+# the one-purpose #4213 fix in release-assets.yml): ONE workflow
+# cuts any surface release end-to-end -- tag -> build from the
+# tag -> release -> asset attach -- executed by the workflow with
+# the repo's own token. The desk's hand is read-back only.
+#
+# Conventions (of record): tag = <surface>-v<version>
+# (apk-v0.1.0 precedent); surface releases are prereleases;
+# asset names are stable per surface (Obtainium-friendly):
+#   apk    -> studysprint.apk
+#   webapp -> studysprint-webapp-v<version>.zip
+#   tui    -> studysprint-tui-v<version>.zip
+# Re-run posture (from #4213): uploads do NOT clobber -- a second
+# run over an existing asset fails loudly rather than replacing
+# silently. If the tag already exists, the build runs from the
+# tag (never from a moved main); if the release already exists,
+# creation is skipped and the run only attaches what is missing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      surface:
+        description: "Surface to cut"
+        type: choice
+        options: [apk, webapp, tui]
+        required: true
+      version:
+        description: "Surface version, e.g. 0.1.3 (no leading v)"
+        type: string
+        required: true
+      source_ref:
+        description: "Ref to tag when the tag does not exist yet"
+        type: string
+        default: main
+      prerelease:
+        description: "Mark the release as a prerelease"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.surface }}-v${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout source ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 0
+
+      - name: Ensure the tag exists at the source head
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "tag $TAG already exists -- building from the tag"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "tag $TAG created at $(git rev-parse HEAD)"
+          fi
+
+      - name: Checkout the tag (the build of record comes from it)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.surface }}-v${{ inputs.version }}
+          path: src
+
+      - name: Set up JDK 17 (apk only)
+        if: inputs.surface == 'apk'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK (apk only)
+        if: inputs.surface == 'apk'
+        run: |
+          set -euo pipefail
+          mkdir -p /opt/android-sdk/cmdline-tools
+          curl -sSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools
+          mv /opt/android-sdk/cmdline-tools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
+          export ANDROID_SDK_ROOT=/opt/android-sdk
+          yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Core deps for state generation (apk only)
+        if: inputs.surface == 'apk'
+        run: pip install fsrs genanki
+
+      - name: Build the artifact from the tag tree
+        env:
+          ANDROID_SDK_ROOT: /opt/android-sdk
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          case "${{ inputs.surface }}" in
+            apk)
+              (cd src && bash android/build.sh)
+              cp src/android/studysprint.apk "$GITHUB_WORKSPACE/studysprint.apk"
+              ;;
+            webapp)
+              (cd src/web && zip -qr "$GITHUB_WORKSPACE/studysprint-webapp-v$VERSION.zip" .)
+              ;;
+            tui)
+              (cd src && zip -qr "$GITHUB_WORKSPACE/studysprint-tui-v$VERSION.zip" \
+                . -i "*.py" "pyproject.toml" "VERSION" "TUI.md" "README.md" \
+                     "requirements.txt" "examples/*" "foundation/*.py" \
+                     "tools/*.py" "tests/*.py" "web/build_data.py")
+              ;;
+          esac
+          ls -la "$GITHUB_WORKSPACE"/studysprint*
+
+      - name: Create the release if absent
+        env:
+          SURFACE: ${{ inputs.surface }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG already exists -- skipping creation"
+          else
+            PRE=""
+            if [ "${{ inputs.prerelease }}" = "true" ]; then PRE="--prerelease"; fi
+            gh release create "$TAG" \
+              --title "StudySprint $SURFACE v$VERSION" \
+              --notes "Surface release $SURFACE v$VERSION, cut by the release-cut workflow (issue #4455 seam 3) from tag $TAG. Changes: see CHANGELOG.md at this tag." \
+              $PRE
+          fi
+
+      - name: Attach the asset (no clobber -- duplicates fail loudly)
+        env:
+          SURFACE: ${{ inputs.surface }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          case "$SURFACE" in
+            apk)    FILE="studysprint.apk" ;;
+            webapp) FILE="studysprint-webapp-v$VERSION.zip" ;;
+            tui)    FILE="studysprint-tui-v$VERSION.zip" ;;
+          esac
+          gh release upload "$TAG" "$GITHUB_WORKSPACE/$FILE"
+          gh release view "$TAG" --json tagName,assets \
+            --jq '{tag: .tagName, assets: [.assets[].name]}'
