@@ -1,0 +1,114 @@
+name: studysprint-sync
+
+# Monorepo -> studysprint WRITE half (monorepo issue #4456).
+# Until this workflow, every sync of record (31/31 -> 102/102)
+# was hand-rolled git-data through an operator PAT. This is the
+# automation: it lives in THIS repo because the write identity
+# is this repo's own token, and the source repo
+# (timerloggedout-spec/termux-monorepo) is public, so the read
+# side needs no credential at all. The fleet Swarm App's
+# installation covers the monorepo only -- it cannot write
+# here, which is why the workflow sits on this side.
+#
+# What it does: clone the monorepo at master, copy
+# apps/studysprint/ over this repo's root (deletions propagate;
+# the parity contract is tree equality), commit + push if the
+# tree moved, then run the subtree's own verifier
+# (tools/resync_parity.py, API mode) as the acceptance gate:
+# any differs / missing-in-target / unexpected target-only file
+# fails the run. The parity count lands in the run summary.
+#
+# Exclusions of record (ss-only, never synced over, never
+# deleted): this repo's .github/workflows/ -- the publishing
+# machinery that exists only here (release-assets.yml,
+# release-cut.yml, and this workflow itself). The verifier sees
+# those as target-only additions; the gate below whitelists
+# exactly that directory.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Parking-proof by construction: no cross-repo event is
+    # needed, so the token-parking class cannot bite. Lag vs a
+    # monorepo merge is bounded by the cadence.
+    - cron: "*/30 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: studysprint-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout this repo (the sync target)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone the monorepo (public, anonymous)
+        run: |
+          set -euo pipefail
+          git clone --depth 1 \
+            https://github.com/timerloggedout-spec/termux-monorepo \
+            "$RUNNER_TEMP/mono"
+          echo "MONO_SHA=$(git -C "$RUNNER_TEMP/mono" rev-parse HEAD)" \
+            >> "$GITHUB_ENV"
+
+      - name: Copy the subtree over this repo's root
+        run: |
+          set -euo pipefail
+          rsync -a --delete \
+            --exclude='.github/' \
+            "$RUNNER_TEMP/mono/apps/studysprint/" ./
+          git status --porcelain | head -50
+
+      - name: Commit + push if the tree moved
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "tree already at parity -- no commit"
+            echo "SYNCED=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "sync: monorepo apps/studysprint @ ${MONO_SHA:0:12} (automated, #4456)"
+          git push
+          echo "SYNCED=true" >> "$GITHUB_ENV"
+
+      - name: Parity gate (resync_parity.py, API mode)
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/mono/apps/studysprint/tools/resync_parity.py" \
+            --local-dir "$RUNNER_TEMP/mono/apps/studysprint" \
+            --json > "$RUNNER_TEMP/parity.json" || true
+          python3 - "$RUNNER_TEMP/parity.json" <<'PYEOF'
+          import json, sys
+          report = json.load(open(sys.argv[1]))
+          extra = [f["path"] for f in report["files"]
+                   if f["status"] == "missing_in_local"
+                   and not f["path"].startswith(".github/workflows/")]
+          ok = (report["differs"] == 0
+                and report["missing_in_target"] == 0
+                and not extra)
+          line = (f"parity: {report['identical']}/{report['total_paths']} "
+                  f"identical - differs {report['differs']} - "
+                  f"missing-in-target {report['missing_in_target']} - "
+                  f"ss-only (excluded) "
+                  f"{report['missing_in_local'] - len(extra)}")
+          print(line)
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+              fh.write(f"## studysprint-sync\n\n{line}\n\n"
+                       f"source monorepo head: "
+                       f"{__import__('os').environ.get('MONO_SHA', '?')}\n")
+          if extra:
+              print("unexpected target-only files:", extra)
+          sys.exit(0 if ok else 1)
+          PYEOF
