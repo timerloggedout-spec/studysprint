@@ -1,0 +1,89 @@
+name: release-assets
+
+# One-purpose fix workflow (issue #4213, RFP-D1-7): the three
+# surface releases (apk-v0.1.0 / webapp-v0.1.0 / tui-v0.1.0) were
+# created via the API, which cannot upload assets — they shipped
+# with 0 assets. This workflow builds/packages the REAL artifacts
+# from each release's own tag, in-Actions, and uploads them with
+# the repo's own token. Dispatch-only; safe to re-run (uploads
+# skip files already present via --clobber off; a second run
+# fails loudly on duplicates rather than replacing silently).
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  attach-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout apk-v0.1.0 (APK source head)
+        uses: actions/checkout@v4
+        with:
+          ref: apk-v0.1.0
+          path: apk-src
+
+      - name: Checkout webapp-v0.1.0
+        uses: actions/checkout@v4
+        with:
+          ref: webapp-v0.1.0
+          path: web-src
+
+      - name: Checkout tui-v0.1.0
+        uses: actions/checkout@v4
+        with:
+          ref: tui-v0.1.0
+          path: tui-src
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK (platform 34 + build-tools 34.0.0)
+        run: |
+          set -euo pipefail
+          mkdir -p /opt/android-sdk/cmdline-tools
+          curl -sSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools
+          mv /opt/android-sdk/cmdline-tools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
+          export ANDROID_SDK_ROOT=/opt/android-sdk
+          yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Core deps for state generation
+        run: pip install fsrs genanki
+
+      - name: Build the APK (fresh build of the release tag's head)
+        env:
+          ANDROID_SDK_ROOT: /opt/android-sdk
+        run: bash apk-src/android/build.sh
+
+      - name: Package the webApp bundle + TUI source package
+        run: |
+          set -euo pipefail
+          (cd web-src/web && zip -qr "$GITHUB_WORKSPACE/studysprint-webapp-v0.1.0.zip" .)
+          (cd tui-src && zip -qr "$GITHUB_WORKSPACE/studysprint-tui-v0.1.0.zip" \
+            . -i "*.py" "VERSION" "TUI.md" "README.md" "requirements.txt" "examples/*" \
+               "foundation/*.py" "tools/*.py" "tests/*.py" "web/build_data.py")
+          ls -la ./*.zip apk-src/android/studysprint.apk
+
+      - name: Upload assets to the three releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload apk-v0.1.0 apk-src/android/studysprint.apk \
+            --repo "$GITHUB_REPOSITORY"
+          gh release upload webapp-v0.1.0 studysprint-webapp-v0.1.0.zip \
+            --repo "$GITHUB_REPOSITORY"
+          gh release upload tui-v0.1.0 studysprint-tui-v0.1.0.zip \
+            --repo "$GITHUB_REPOSITORY"
+          {
+            echo "### Release assets attached (#4213)"
+            echo "- apk-v0.1.0 <- studysprint.apk (fresh build of the tag head)"
+            sha256sum apk-src/android/studysprint.apk studysprint-webapp-v0.1.0.zip studysprint-tui-v0.1.0.zip
+          } >> "$GITHUB_STEP_SUMMARY"
