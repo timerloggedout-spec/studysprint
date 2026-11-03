@@ -44,7 +44,7 @@ the bundle serves from the project's Pages site.
 | .apkg / vault export | absent | export stays a CLI/TUI surface in this version |
 | Reading pipeline (§1b) | absent | core v0.4.0; web parity pass pending |
 | Multi-course / countdown / .ics | absent | core v0.4.0; web parity pass pending |
-| Memory methods (x6) | absent | core v0.4.0; web parity pass pending |
+| Memory methods (§1c) | present | Memory view: palace walk (iteration-1 temple route) scored by the core's ordered-recall rule · Feynman explain-back graded on key-term coverage of the verified section text (abstain/escalate named) · retrievability reminders at R ≤ 0.9 with one-tap grades · Leitner boxes selectable in SR · interleaved session in the Plan view — browser ports of the core scorers, battery-pinned (iteration 2) |
 | Calendar awareness (§1d) | present | Calendar view over the core assembler (build-time state, as the bundle's other state) |
 | Geography (§1d) | present | Routes view — locations · assessment routes · temple route + audio cues (build-time state) |
 
@@ -69,3 +69,9 @@ Every iteration of this surface ships only when ALL hold:
 - Parity statement present: what this surface rides vs the foundation
   version it ships against, and what is honestly absent/pending.
 - Tests green for the surface + no foundation regressions.
+- **Parity table in every release body (owner rule, 2026-11-03):** from
+  v1.0.0 onward, every release of record for this surface carries the
+  current surface×core parity table (`evidence/PARITY-MATRIX.md`,
+  embedded verbatim from the cut tag by the studysprint repo's
+  release-cut machinery). A cut from a pre-matrix tag falls back to a
+  named versions-of-record line. Patch cuts included.
