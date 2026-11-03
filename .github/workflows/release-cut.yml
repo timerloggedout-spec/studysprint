@@ -235,9 +235,10 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          # Parity enforcement (issue #4667): the parity table
-          # is REQUIRED with
-          # each release FROM v1.0.0 -- a v1.0.0+ cut whose tag
+          # Owner rule (2026-11-03): the parity table is
+          # REQUIRED with each release; scope per D1 ruling
+          # (A) on issue #4667: the requirement binds FROM
+          # v1.0.0 -- a v1.0.0+ cut whose tag
           # tree lacks the matrix FAILS here, before any build
           # money is spent. Legacy tags (pre-1.0.0, cut before
           # the matrix rode the tree) take the named fallback in
