@@ -1,0 +1,152 @@
+name: submission-snapshot
+
+# Submission freeze snapshot (monorepo issue #4490).
+# On the freeze window (Nov 4 ~22:30 PT, ahead of the 23:59
+# lock) this captures the submission repo's state of record:
+# the suite runs FIRST (test prior), then an annotated tag +
+# prerelease preserve exactly what was tested -- HEAD sha,
+# tree sha, suite verdict/counts, timestamp -- in a MANIFEST.
+#
+# Red-suite rule: the snapshot publishes EVEN IF the suite is
+# red, with the verdict stamped in the manifest and release
+# notes, and the run fails loudly AFTER publishing. A red
+# state is both preserved and impossible to miss.
+#
+# Clobber guard (release-cut precedent): if the freeze tag
+# already exists --
+#   * pointing at HEAD      -> verify-and-no-op (true repeat)
+#   * pointing elsewhere    -> FAIL before touching anything.
+# A freeze tag never moves silently. To re-arm after the
+# proving rehearsal, delete the rehearsal tag + release and
+# re-dispatch (the desk's hand, on the publish).
+#
+# Asset uploads happen here, in Actions, because the API
+# surrogate cannot upload release binaries.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 5 11 *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: submission-snapshot
+  cancel-in-progress: false
+
+env:
+  TAG: submission-freeze-2026-11-04
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for the tag/tree record)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clobber guard
+        run: |
+          set -euo pipefail
+          git fetch --tags --quiet
+          HEAD_SHA=$(git rev-parse HEAD)
+          echo "HEAD_SHA=$HEAD_SHA" >> "$GITHUB_ENV"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            TAG_SHA=$(git rev-list -n 1 "$TAG")
+            if [ "$TAG_SHA" = "$HEAD_SHA" ]; then
+              echo "::notice::freeze tag $TAG already at HEAD -- verify-and-no-op"
+              echo "SKIP_SNAPSHOT=1" >> "$GITHUB_ENV"
+            else
+              echo "::error::freeze tag $TAG exists at $TAG_SHA, HEAD is $HEAD_SHA -- refusing to move a freeze tag. Delete the rehearsal tag + release to re-arm."
+              exit 1
+            fi
+          fi
+
+      - name: TEST PRIOR — the repo suite, firsthand in-job
+        if: env.SKIP_SNAPSHOT != '1'
+        run: |
+          set -uo pipefail
+          pip install -q pytest fsrs genanki textual
+          set +e
+          python3 -m pytest tests/ -q --junitxml=/tmp/junit.xml
+          rc=$?
+          set -e
+          echo "SUITE_RC=$rc" >> "$GITHUB_ENV"
+          SUITE_RC=$rc python3 - <<'PYEOF'
+          import json, os
+          import xml.etree.ElementTree as ET
+          root = ET.parse("/tmp/junit.xml").getroot()
+          suites = root.iter("testsuite")
+          t = f = e = s = 0
+          for su in suites:
+              t += int(su.get("tests", 0)); f += int(su.get("failures", 0))
+              e += int(su.get("errors", 0)); s += int(su.get("skipped", 0))
+          counts = {"total": t, "passed": t - f - e - s,
+                    "failed": f, "errors": e, "skipped": s}
+          verdict = "PASS" if os.environ.get(
+              "SUITE_RC", "1") == "0" else "FAIL"
+          with open("/tmp/suite.json", "w") as fh:
+              json.dump({"verdict": verdict, "counts": counts}, fh)
+          print("suite:", verdict, counts)
+          PYEOF
+          cat /tmp/suite.json
+
+      - name: SNAPSHOT — manifest, annotated tag, prerelease
+        if: env.SKIP_SNAPSHOT != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TREE_SHA=$(git rev-parse HEAD^{tree})
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          python3 - <<PYEOF
+          import json
+          suite = json.load(open("/tmp/suite.json"))
+          manifest = {
+              "snapshot": "$TAG",
+              "head": "$HEAD_SHA",
+              "tree": "$TREE_SHA",
+              "suite": suite,
+              "timestamp": "$TS",
+              "run": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+          }
+          json.dump(manifest, open("MANIFEST.json", "w"), indent=2)
+          print(json.dumps(manifest, indent=2))
+          PYEOF
+          VERDICT=$(python3 -c "import json; print(json.load(open('/tmp/suite.json'))['verdict'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Submission freeze 2026-11-04 — HEAD $HEAD_SHA · tree $TREE_SHA · suite $VERDICT (manifest in the prerelease)"
+          git push origin "$TAG"
+          git archive --format=zip --output /tmp/submission-source.zip HEAD
+          if [ "$VERDICT" = "PASS" ]; then
+            NOTES="Submission freeze snapshot. Suite: PASS. The MANIFEST.json asset records HEAD, tree, counts and timestamp; submission-source.zip is the tagged tree."
+          else
+            NOTES="⚠ Submission freeze snapshot — SUITE: FAIL at freeze time (counts in MANIFEST.json). The red state is preserved deliberately (issue #4490 red-suite rule); the run that published this failed loudly after publishing."
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::release $TAG already exists but its tag did not match the guard state -- refusing to clobber"
+            exit 1
+          fi
+          gh release create "$TAG" --prerelease \
+            --title "Submission freeze 2026-11-04" --notes "$NOTES"
+          gh release upload "$TAG" /tmp/submission-source.zip MANIFEST.json
+          gh release view "$TAG" --json tagName,assets \
+            --jq '{tag: .tagName, assets: [.assets[].name]}'
+
+      - name: Verdict stamp + loud failure on a red suite
+        if: env.SKIP_SNAPSHOT != '1'
+        run: |
+          set -euo pipefail
+          VERDICT=$(python3 -c "import json; print(json.load(open('/tmp/suite.json'))['verdict'])")
+          {
+            echo "## submission-snapshot"
+            echo
+            echo "tag: $TAG · HEAD: $HEAD_SHA · suite: **$VERDICT**"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$VERDICT" != "PASS" ]; then
+            echo "::error::suite was RED at snapshot time — the snapshot published with the verdict stamped; this run now fails loudly, per the red-suite rule"
+            exit 1
+          fi
