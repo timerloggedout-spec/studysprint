@@ -230,18 +230,29 @@ jobs:
           } > TRUST.md
           cat TRUST.md
 
+      - name: Parity matrix present at the tag (owner rule)
+        run: |
+          set -euo pipefail
+          # Owner rule (2026-11-03 14:46 PT; issue #4667): the
+          # parity table is REQUIRED with each release -- if the
+          # matrix is absent from the tag tree, the cut FAILS
+          # here, before any build money is spent.
+          if [ ! -f src/evidence/PARITY-MATRIX.md ]; then
+            echo "::error::evidence/PARITY-MATRIX.md absent from the tag tree -- a release without the parity table is not a release (owner rule 2026-11-03)"
+            exit 1
+          fi
+          echo "parity matrix present at the tag: $(git -C src rev-parse HEAD)"
+
       - name: Compose release notes (parity table of record)
         env:
           SURFACE: ${{ inputs.surface }}
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          # Owner rule (2026-11-03 14:46 PT): the parity table is
-          # required with each release. Source of truth = the
-          # matrix at the cut tag (src/evidence/PARITY-MATRIX.md),
-          # reproduced verbatim -- never retyped, never summarized.
-          # Absent at the tag -> the versions of record stand in,
-          # named as the fallback they are.
+          # The Parity section carries the matrix AS OF THE TAG
+          # TREE: its ground-truth header + the capability table,
+          # verbatim -- never retyped, never summarized -- plus
+          # the path to the file at this tag.
           {
             echo "Surface release $SURFACE v$VERSION, cut by the release-cut workflow (issue #4455 seam 3) from tag $TAG. Changes: see CHANGELOG.md at this tag."
             echo
@@ -249,11 +260,9 @@ jobs:
             echo
             echo "Foundation: v$(cat src/VERSION 2>/dev/null || echo 'not stamped') · this surface: v$VERSION (tag $TAG)"
             echo
-            if [ -f src/evidence/PARITY-MATRIX.md ]; then
-              awk '/^\| Core capability/,/^$/' src/evidence/PARITY-MATRIX.md
-            else
-              echo "_Parity matrix not present at this tag; versions of record: webApp $(cat src/web/VERSION 2>/dev/null || echo n/a) · APK $(cat src/android/VERSION 2>/dev/null || echo n/a)._"
-            fi
+            echo "Parity matrix of record: \`evidence/PARITY-MATRIX.md\` at tag \`$TAG\`."
+            echo
+            awk '/^# Surface/,/^## Catch-up/' src/evidence/PARITY-MATRIX.md | head -n -1 | tac | awk 'NF {p=1} p' | tac
           } > "$RUNNER_TEMP/notes.md"
           cat "$RUNNER_TEMP/notes.md"
 
