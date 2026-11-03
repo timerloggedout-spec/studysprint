@@ -230,6 +230,33 @@ jobs:
           } > TRUST.md
           cat TRUST.md
 
+      - name: Compose release notes (parity table of record)
+        env:
+          SURFACE: ${{ inputs.surface }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          # Owner rule (2026-11-03 14:46 PT): the parity table is
+          # required with each release. Source of truth = the
+          # matrix at the cut tag (src/evidence/PARITY-MATRIX.md),
+          # reproduced verbatim -- never retyped, never summarized.
+          # Absent at the tag -> the versions of record stand in,
+          # named as the fallback they are.
+          {
+            echo "Surface release $SURFACE v$VERSION, cut by the release-cut workflow (issue #4455 seam 3) from tag $TAG. Changes: see CHANGELOG.md at this tag."
+            echo
+            echo "## Surface parity at this cut"
+            echo
+            echo "Foundation: v$(cat src/VERSION 2>/dev/null || echo 'not stamped') · this surface: v$VERSION (tag $TAG)"
+            echo
+            if [ -f src/evidence/PARITY-MATRIX.md ]; then
+              awk '/^\| Core capability/,/^$/' src/evidence/PARITY-MATRIX.md
+            else
+              echo "_Parity matrix not present at this tag; versions of record: webApp $(cat src/web/VERSION 2>/dev/null || echo n/a) · APK $(cat src/android/VERSION 2>/dev/null || echo n/a)._"
+            fi
+          } > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
       - name: Create the release if absent
         env:
           SURFACE: ${{ inputs.surface }}
@@ -243,7 +270,7 @@ jobs:
             if [ "${{ inputs.prerelease }}" = "true" ]; then PRE="--prerelease"; fi
             gh release create "$TAG" \
               --title "StudySprint $SURFACE v$VERSION" \
-              --notes "Surface release $SURFACE v$VERSION, cut by the release-cut workflow (issue #4455 seam 3) from tag $TAG. Changes: see CHANGELOG.md at this tag." \
+              --notes-file "$RUNNER_TEMP/notes.md" \
               $PRE
           fi
 
