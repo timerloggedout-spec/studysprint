@@ -122,6 +122,28 @@ jobs:
                 . -i "*.py" "pyproject.toml" "VERSION" "TUI.md" "README.md" \
                      "requirements.txt" "examples/*" "foundation/*.py" \
                      "tools/*.py" "tests/*.py" "web/build_data.py")
+              # The reader edition rides the TUI release as a
+              # second asset (#4472): generated from the tag
+              # tree's own state, stable-named like the APK.
+              pip install -q fsrs genanki
+              (cd src && python3 - <<'PYEOF'
+              import sys
+              from pathlib import Path
+              sys.path.insert(0, ".")
+              import tui
+              from study_sr import export_epub
+              state = tui.build_state(Path("."))
+              receipt = export_epub(
+                  state["sections"],
+                  Path("../studysprint-reader.epub"),
+                  title=state["plan"].get("course")
+                  or "StudySprint course",
+                  surface_version=tui.TUI_VERSION,
+                  course_note="Sample course bundled with "
+                              "StudySprint (synthetic).")
+              print("epub receipt:", receipt)
+              PYEOF
+              )
               ;;
           esac
           ls -la "$GITHUB_WORKSPACE"/studysprint*
@@ -204,6 +226,10 @@ jobs:
           if [ "$SURFACE" = "apk" ]; then
             gh release upload "$TAG" \
               "$GITHUB_WORKSPACE/SHA256SUMS" "$GITHUB_WORKSPACE/TRUST.md"
+          fi
+          if [ "$SURFACE" = "tui" ]; then
+            gh release upload "$TAG" \
+              "$GITHUB_WORKSPACE/studysprint-reader.epub"
           fi
           gh release view "$TAG" --json tagName,assets \
             --jq '{tag: .tagName, assets: [.assets[].name]}'
