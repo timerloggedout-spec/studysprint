@@ -231,17 +231,28 @@ jobs:
           cat TRUST.md
 
       - name: Parity matrix present at the tag (owner rule)
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          # Owner rule (2026-11-03 14:46 PT; issue #4667): the
-          # parity table is REQUIRED with each release -- if the
-          # matrix is absent from the tag tree, the cut FAILS
-          # here, before any build money is spent.
+          # Owner rule (2026-11-03 14:46 PT; issue #4667, Desk
+          # ruling on scope): the parity table is REQUIRED with
+          # each release FROM v1.0.0 -- a v1.0.0+ cut whose tag
+          # tree lacks the matrix FAILS here, before any build
+          # money is spent. Legacy tags (pre-1.0.0, cut before
+          # the matrix rode the tree) take the named fallback in
+          # the compose step instead; from v1.0.0 the matrix is
+          # in every tag tree, so the rule binds at full strength.
           if [ ! -f src/evidence/PARITY-MATRIX.md ]; then
-            echo "::error::evidence/PARITY-MATRIX.md absent from the tag tree -- a release without the parity table is not a release (owner rule 2026-11-03)"
-            exit 1
+            MAJOR="${VERSION%%.*}"
+            if [ "$MAJOR" -ge 1 ] 2>/dev/null; then
+              echo "::error::evidence/PARITY-MATRIX.md absent from the tag tree of a v$VERSION cut -- a release without the parity table is not a release (owner rule 2026-11-03)"
+              exit 1
+            fi
+            echo "::warning::parity matrix absent from this legacy tag tree (v$VERSION) -- the compose step stamps the named fallback"
+          else
+            echo "parity matrix present at the tag: $(git -C src rev-parse HEAD)"
           fi
-          echo "parity matrix present at the tag: $(git -C src rev-parse HEAD)"
 
       - name: Compose release notes (parity table of record)
         env:
@@ -260,9 +271,13 @@ jobs:
             echo
             echo "Foundation: v$(cat src/VERSION 2>/dev/null || echo 'not stamped') · this surface: v$VERSION (tag $TAG)"
             echo
-            echo "Parity matrix of record: \`evidence/PARITY-MATRIX.md\` at tag \`$TAG\`."
-            echo
-            awk '/^# Surface/,/^## Catch-up/' src/evidence/PARITY-MATRIX.md | head -n -1 | tac | awk 'NF {p=1} p' | tac
+            if [ -f src/evidence/PARITY-MATRIX.md ]; then
+              echo "Parity matrix of record: \`evidence/PARITY-MATRIX.md\` at tag \`$TAG\`."
+              echo
+              awk '/^# Surface/,/^## Catch-up/' src/evidence/PARITY-MATRIX.md | head -n -1 | tac | awk 'NF {p=1} p' | tac
+            else
+              echo "_Parity matrix not present at this legacy tag (pre-v1.0.0); versions of record: webApp $(cat src/web/VERSION 2>/dev/null || echo n/a) · APK $(cat src/android/VERSION 2>/dev/null || echo n/a). From v1.0.0 the matrix is required and its absence fails the cut (owner rule 2026-11-03, #4667)._"
+            fi
           } > "$RUNNER_TEMP/notes.md"
           cat "$RUNNER_TEMP/notes.md"
 
