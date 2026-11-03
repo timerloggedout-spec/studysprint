@@ -85,21 +85,62 @@ jobs:
         if: inputs.surface == 'apk'
         run: |
           set -euo pipefail
+          # Prefer the runner image's preinstalled SDK when it
+          # already carries the packages (no download at all);
+          # otherwise download with retries -- a truncated
+          # package zip killed the 0.2.0 cut at this step
+          # ("Error on ZipFile unknown archive", run
+          # 41699794059), so a single attempt is not enough.
+          PRE=/usr/local/lib/android/sdk
+          if [ -d "$PRE/platforms/android-34" ] && [ -d "$PRE/build-tools/34.0.0" ]; then
+            echo "ANDROID_SDK_ROOT=$PRE" >> "$GITHUB_ENV"
+            echo "using preinstalled SDK at $PRE"
+            exit 0
+          fi
           mkdir -p /opt/android-sdk/cmdline-tools
           curl -sSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
           unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools
           mv /opt/android-sdk/cmdline-tools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
           export ANDROID_SDK_ROOT=/opt/android-sdk
           yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-          /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          ok=""
+          for i in 1 2 3; do
+            if /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"; then ok=1; break; fi
+            echo "sdkmanager attempt $i failed -- retrying"
+            sleep 5
+          done
+          [ -n "$ok" ] || { echo "SDK install failed after 3 attempts"; exit 1; }
+          echo "ANDROID_SDK_ROOT=/opt/android-sdk" >> "$GITHUB_ENV"
 
       - name: Core deps for state generation (apk only)
         if: inputs.surface == 'apk'
         run: pip install fsrs genanki
 
+      - name: Write the reader-EPUB generator (tui only)
+        if: inputs.surface == 'tui'
+        run: |
+          cat > "$RUNNER_TEMP/gen_epub.py" <<'PYEOF'
+          import sys
+          from pathlib import Path
+          src = Path(sys.argv[1])
+          out = Path(sys.argv[2])
+          sys.path.insert(0, str(src))
+          import tui
+          from study_sr import export_epub
+          state = tui.build_state(src)
+          receipt = export_epub(
+              state["sections"],
+              out,
+              title=state["plan"].get("course")
+              or "StudySprint course",
+              surface_version=tui.TUI_VERSION,
+              course_note="Sample course bundled with "
+                          "StudySprint (synthetic).")
+          print("epub receipt:", receipt)
+          PYEOF
+
       - name: Build the artifact from the tag tree
         env:
-          ANDROID_SDK_ROOT: /opt/android-sdk
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
@@ -125,25 +166,21 @@ jobs:
               # The reader edition rides the TUI release as a
               # second asset (#4472): generated from the tag
               # tree's own state, stable-named like the APK.
-              pip install -q fsrs genanki
-              (cd src && python3 - <<'PYEOF'
-              import sys
-              from pathlib import Path
-              sys.path.insert(0, ".")
-              import tui
-              from study_sr import export_epub
-              state = tui.build_state(Path("."))
-              receipt = export_epub(
-                  state["sections"],
-                  Path("../studysprint-reader.epub"),
-                  title=state["plan"].get("course")
-                  or "StudySprint course",
-                  surface_version=tui.TUI_VERSION,
-                  course_note="Sample course bundled with "
-                              "StudySprint (synthetic).")
-              print("epub receipt:", receipt)
-              PYEOF
-              )
+              # The generator is written by its own step (a
+              # heredoc nested in this case branch loses its
+              # terminator to YAML indentation -- that syntax
+              # error killed the 0.2.0 webapp AND tui cuts,
+              # runs 41699805302 / 41699815962). The leg runs
+              # only when the tag tree carries export_epub --
+              # the 0.2.0 tag predates the eReader build, and
+              # coupling the surface cut to a second asset's
+              # landing would block the cut itself.
+              if grep -q "def export_epub" src/study_sr.py; then
+                pip install -q fsrs genanki
+                (cd src && python3 "$RUNNER_TEMP/gen_epub.py" "$PWD" "$GITHUB_WORKSPACE/studysprint-reader.epub")
+              else
+                echo "::warning::export_epub not in this tag tree -- reader EPUB skipped for this cut"
+              fi
               ;;
           esac
           ls -la "$GITHUB_WORKSPACE"/studysprint*
@@ -151,11 +188,10 @@ jobs:
       - name: Trust artifacts (apk only)
         if: inputs.surface == 'apk'
         env:
-          ANDROID_SDK_ROOT: /opt/android-sdk
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          BT=/opt/android-sdk/build-tools/34.0.0
+          BT=$ANDROID_SDK_ROOT/build-tools/34.0.0
           cd "$GITHUB_WORKSPACE"
           sha256sum studysprint.apk > SHA256SUMS
           SHA=$(cut -d' ' -f1 SHA256SUMS)
@@ -228,8 +264,12 @@ jobs:
               "$GITHUB_WORKSPACE/SHA256SUMS" "$GITHUB_WORKSPACE/TRUST.md"
           fi
           if [ "$SURFACE" = "tui" ]; then
-            gh release upload "$TAG" \
-              "$GITHUB_WORKSPACE/studysprint-reader.epub"
+            if [ -f "$GITHUB_WORKSPACE/studysprint-reader.epub" ]; then
+              gh release upload "$TAG" \
+                "$GITHUB_WORKSPACE/studysprint-reader.epub"
+            else
+              echo "no reader EPUB in this cut -- attach skipped"
+            fi
           fi
           gh release view "$TAG" --json tagName,assets \
             --jq '{tag: .tagName, assets: [.assets[].name]}'
