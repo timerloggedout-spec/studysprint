@@ -41,6 +41,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   cut:
@@ -103,6 +105,12 @@ jobs:
           set -euo pipefail
           case "${{ inputs.surface }}" in
             apk)
+              # Reproducible build (#4438): the tag's commit
+              # time pins the build clock + zip timestamps, so
+              # anyone rebuilding from this tag gets the same
+              # bytes (SHA256SUMS + TRUST.md ship with the cut).
+              export SOURCE_DATE_EPOCH="$(cd src && git log -1 --format=%ct)"
+              echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
               (cd src && bash android/build.sh)
               cp src/android/studysprint.apk "$GITHUB_WORKSPACE/studysprint.apk"
               ;;
@@ -117,6 +125,52 @@ jobs:
               ;;
           esac
           ls -la "$GITHUB_WORKSPACE"/studysprint*
+
+      - name: Trust artifacts (apk only)
+        if: inputs.surface == 'apk'
+        env:
+          ANDROID_SDK_ROOT: /opt/android-sdk
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          BT=/opt/android-sdk/build-tools/34.0.0
+          cd "$GITHUB_WORKSPACE"
+          sha256sum studysprint.apk > SHA256SUMS
+          SHA=$(cut -d' ' -f1 SHA256SUMS)
+          SIZE=$(stat -c%s studysprint.apk)
+          CERT=$("$BT/apksigner" verify --print-certs studysprint.apk \
+            | grep "SHA-256 digest" | head -1 | awk '{print $NF}')
+          VCODE=$(grep -o 'android:versionCode="[0-9]*"' \
+            src/android/AndroidManifest.xml | grep -o '[0-9]*')
+          {
+            echo "# StudySprint APK — release trust block"
+            echo
+            echo "- Release: apk-v$VERSION (tag apk-v$VERSION, prerelease surface cut)"
+            echo "- Asset: studysprint.apk (stable name — the Obtainium/update channel keys on it)"
+            echo "- SHA-256: $SHA"
+            echo "- Size: $SIZE bytes"
+            echo "- Signer certificate SHA-256: $CERT"
+            echo "- versionName $VERSION · versionCode $VCODE"
+            echo "- SDK: min 26 · target 34"
+            echo "- Permissions declared: none (the shell serves its bundled web app locally; no INTERNET, no device access)"
+            echo "- Build clock: SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH (the tag's commit time)"
+            echo
+            echo "## Verify this download"
+            echo
+            echo '```'
+            echo "sha256sum -c SHA256SUMS"
+            echo "apksigner verify --print-certs studysprint.apk   # signer digest must match above"
+            echo '```'
+            echo
+            echo "## Reproduce this build"
+            echo
+            echo '```'
+            echo "git checkout apk-v$VERSION"
+            echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH bash android/build.sh"
+            echo "sha256sum android/studysprint.apk   # must equal the SHA-256 above"
+            echo '```'
+          } > TRUST.md
+          cat TRUST.md
 
       - name: Create the release if absent
         env:
@@ -147,5 +201,15 @@ jobs:
             tui)    FILE="studysprint-tui-v$VERSION.zip" ;;
           esac
           gh release upload "$TAG" "$GITHUB_WORKSPACE/$FILE"
+          if [ "$SURFACE" = "apk" ]; then
+            gh release upload "$TAG" \
+              "$GITHUB_WORKSPACE/SHA256SUMS" "$GITHUB_WORKSPACE/TRUST.md"
+          fi
           gh release view "$TAG" --json tagName,assets \
             --jq '{tag: .tagName, assets: [.assets[].name]}'
+
+      - name: Attest build provenance (apk only)
+        if: inputs.surface == 'apk'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ github.workspace }}/studysprint.apk
