@@ -81,7 +81,32 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "sync: monorepo apps/studysprint @ ${MONO_SHA:0:12} (automated, #4456)"
-          git push
+          # Push-race armor (the #4389 class): this run may have
+          # sat queued while main moved -- another ss commit
+          # landing inside the window makes a bare push a
+          # non-fast-forward rejection (first seen 2026-11-03,
+          # run 41683078577). Replay the sync commit onto the
+          # moved target and retry; a rebase conflict means the
+          # moved target touched synced content -- abort loudly
+          # for a human rather than guess.
+          pushed=false
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              pushed=true
+              break
+            fi
+            echo "push rejected (attempt $attempt) -- fetching + rebasing onto origin/main"
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort
+              echo "::error::sync commit conflicts with the moved main -- human review required"
+              exit 1
+            fi
+          done
+          if [ "$pushed" != "true" ]; then
+            echo "::error::push still rejected after 3 attempts"
+            exit 1
+          fi
           echo "SYNCED=true" >> "$GITHUB_ENV"
 
       - name: Parity gate (resync_parity.py, API mode)
