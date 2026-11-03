@@ -64,6 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           rsync -a --delete \
+            --exclude='.git/' \
             --exclude='.github/' \
             "$RUNNER_TEMP/mono/apps/studysprint/" ./
           git status --porcelain | head -50
