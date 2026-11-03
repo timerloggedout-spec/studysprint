@@ -3,6 +3,64 @@
 All notable changes to StudySprint. Process: `VERSIONING.md`.
 Entries are the GitHub Release notes, verbatim.
 
+## [0.4.0] — 2026-11-03
+
+Fourth versioned state: MINOR feature batch (v0.4.0 batch) — the
+reading pipeline §1b in full (RFP-D1-3, issue #4111), multi-course
+intake, exam countdowns, and .ics export (RFP-D1-4, issue #4112),
+and the memory-methods expansion (RFP-D1-5, issue #4113).
+
+Provider credit: command-dispatch (Swarm Optimizations &
+Implementation Assurance seat), session
+6628d41d-9519-4881-9063-3afe501df815.
+
+### Added
+- Reading pipeline (`study_pipeline.py`): the six §1b stages —
+  edition finder over legal open sources (OpenLibrary, archive.org)
+  with a student-confirm step before anything plans from an edition;
+  upload intake in any form (text native, photos/scans via OCR,
+  PDF/EPUB via an injected structured extractor); structure
+  extraction (chapters -> sections) mapped onto the reader core's
+  Section type; per-chapter Index+Glossary term bank implementing
+  the reader's term-lookup hook and feeding SR cards; term emphasis
+  segmentation + tap payloads; hypothes.is annotations as W3C Web
+  Annotation JSON-LD with an API client (the API-only option from
+  the #3697 evaluation; selections convert to SR cards and flagged
+  terms to annotations). All network/OCR touches are injected
+  callables — the module is offline by default.
+- Tests: `tests/test_study_pipeline.py` covers every public
+  function in `study_pipeline.py`.
+- Multi-course intake (`study_courses.py`): N syllabus documents ->
+  N plans (via the existing plan builder) in one stamped bundle
+  with merged totals and deadline conflict flags (same-week exams;
+  exams within 7 days).
+- Exam countdown per course: from the syllabus `exam_date` —
+  days/weeks remaining, urgency tier, the implied study pace
+  (sessions per day), and countdown milestones (T-14, T-7, T-3,
+  exam day).
+- .ics export: every plan session plus countdown milestones and
+  exam days as iCalendar VEVENTs (CRLF, stable UIDs, RFC 5545
+  escaping), with a parse-back validator (`validate_ics`).
+- Tests: `tests/test_study_courses.py` covers every public
+  function in `study_courses.py`.
+- Memory methods (`study_memory.py`), all six RFP-D1-5 items, each
+  carrying its evidence grade and claims ceiling in code, receipts,
+  and FEATURES: (1) method of loci — chapters -> palace route,
+  term-bank items at loci, walk-mode review of ordered recall
+  (ceiling: ordered/concrete recall, not understanding);
+  (2) Pomodoro session engine — 25/5 blocks x4 + long break,
+  check-in = block completion, adaptive block length (ceiling:
+  pacing/starting, not memory); (3) retrievability notifications —
+  fire at the FSRS threshold with the cue + one-tap grade in the
+  reminder, implementation-intention phrasing; (4) Feynman
+  explain-back graded against verified evidence only (abstain with
+  no evidence, escalate on thin coverage); (5) interleaved
+  quiz/card sessions (deterministic rotation, mixed topics);
+  (6) Leitner boxes — the plain-language onboarding scheduler,
+  receipt-stamped.
+- Tests: `tests/test_study_memory.py` covers every public
+  function in `study_memory.py`.
+
 ## [0.3.0] — 2026-11-02
 
 Third versioned state: MINOR feature batch adding the
