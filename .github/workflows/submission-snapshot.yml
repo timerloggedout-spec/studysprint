@@ -101,14 +101,30 @@ jobs:
           set -euo pipefail
           TREE_SHA=$(git rev-parse HEAD^{tree})
           TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          # Parity stamp (issue #4667, owner rule 2026-11-03):
+          # the MANIFEST records the matrix file's blob sha + its
+          # ground-truth surface-line version at THIS tree. A
+          # freeze is never blocked by the stamp (red-suite
+          # philosophy) -- an absent matrix is recorded as an
+          # absence, loudly, never silently.
+          if [ -f evidence/PARITY-MATRIX.md ]; then
+            PARITY_BLOB=$(git rev-parse HEAD:evidence/PARITY-MATRIX.md)
+            PARITY_LINE=$(sed -n '1,/^| Core capability/p' evidence/PARITY-MATRIX.md | tr '\n' ' ' | sed -E 's/.*surface line[^0-9]*\*\*([0-9]+\.[0-9]+\.[0-9]+)\*\*.*/\1/' || true)
+            PARITY_JSON="{\"matrix_blob\": \"$PARITY_BLOB\", \"surface_line\": \"$PARITY_LINE\", \"path\": \"evidence/PARITY-MATRIX.md\"}"
+          else
+            PARITY_JSON="null"
+            echo "::warning::evidence/PARITY-MATRIX.md absent at the snapshot tree -- the MANIFEST parity stamp records the absence"
+          fi
+          export PARITY_JSON
           python3 - <<PYEOF
-          import json
+          import json, os
           suite = json.load(open("/tmp/suite.json"))
           manifest = {
               "snapshot": "$TAG",
               "head": "$HEAD_SHA",
               "tree": "$TREE_SHA",
               "suite": suite,
+              "parity": json.loads(os.environ.get("PARITY_JSON", "null")),
               "timestamp": "$TS",
               "run": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
           }
