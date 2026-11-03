@@ -235,8 +235,8 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          # Owner rule (2026-11-03 14:46 PT; issue #4667, Desk
-          # ruling on scope): the parity table is REQUIRED with
+          # Parity enforcement (issue #4667): the parity table
+          # is REQUIRED with
           # each release FROM v1.0.0 -- a v1.0.0+ cut whose tag
           # tree lacks the matrix FAILS here, before any build
           # money is spent. Legacy tags (pre-1.0.0, cut before
