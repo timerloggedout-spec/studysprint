@@ -1,0 +1,66 @@
+name: StudySprint 0.6.0 branch validation
+
+on:
+  push:
+    branches:
+      - experiment/0.6.0
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "study_adaptive.py"
+      - "tests/test_study_adaptive.py"
+      - ".github/workflows/studysprint-06-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studysprint-06-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pytest
+      - name: Run complete test suite
+        run: python -m pytest -q tests/
+      - name: Run offline product demo
+        run: python demo.py
+      - name: Validate adaptive planner public API
+        run: |
+          python - <<'PY'
+          from study_adaptive import build_adaptive_plan
+          result = build_adaptive_plan(
+              [{
+                  "task_id": "release-smoke",
+                  "estimated_minutes": 25,
+                  "evidence_refs": ["fixture:confirmed"],
+                  "evidence_verified": True,
+                  "student_confirmed": True,
+                  "priority": 5,
+              }],
+              [{
+                  "start": "2026-11-06T09:00:00-08:00",
+                  "end": "2026-11-06T10:00:00-08:00",
+                  "source": "smoke-fixture",
+              }],
+              now="2026-11-06T08:00:00-08:00",
+          )
+          assert result["scheduled_minutes"] == 25, result
+          assert len(result["sessions"]) == 1, result
+          assert result["sessions"][0]["evidence_refs"] == ["fixture:confirmed"]
+          print("adaptive planner smoke test passed")
+          PY
