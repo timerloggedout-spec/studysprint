@@ -1,16 +1,48 @@
 name: release-assets
 
-# One-purpose fix workflow (issue #4213, RFP-D1-7): the three
-# surface releases (apk-v0.1.0 / webapp-v0.1.0 / tui-v0.1.0) were
-# created via the API, which cannot upload assets — they shipped
-# with 0 assets. This workflow builds/packages the REAL artifacts
-# from each release's own tag, in-Actions, and uploads them with
-# the repo's own token. Dispatch-only; safe to re-run (uploads
-# skip files already present via --clobber off; a second run
-# fails loudly on duplicates rather than replacing silently).
+# Generalized asset attach (issue #4455 seam 3 follow-through,
+# generalizing the one-purpose #4213 fix this file began as):
+# builds/packages the REAL artifacts for the three surface
+# releases from each release's own tag, in-Actions, and uploads
+# them with the repo's own token.
+#
+# Tag selection (release-cut's contract): per surface, a
+# dispatch input version wins; a blank input resolves the LATEST
+# <surface>-v<semver> tag in this repo at run time. Nothing is
+# pinned to a version in this file any more.
+#
+# Asset names are stable per surface (release-cut conventions):
+#   apk    -> studysprint.apk
+#   webapp -> studysprint-webapp-v<version>.zip (= studysprint-<tag>.zip)
+#   tui    -> studysprint-tui-v<version>.zip    (= studysprint-<tag>.zip)
+#
+# Dispatch-only; safe to re-run (uploads skip files already
+# present via --clobber off; a second run fails loudly on
+# duplicates rather than replacing silently). dry_run resolves
+# and reports the tag/asset plan and builds/uploads NOTHING.
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      apk_version:
+        description: "apk version, e.g. 0.5.1 (blank = latest apk-v* tag)"
+        type: string
+        required: false
+        default: ""
+      webapp_version:
+        description: "webapp version, e.g. 0.5.1 (blank = latest webapp-v* tag)"
+        type: string
+        required: false
+        default: ""
+      tui_version:
+        description: "tui version, e.g. 0.5.1 (blank = latest tui-v* tag)"
+        type: string
+        required: false
+        default: ""
+      dry_run:
+        description: "Resolve + report only; build/upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -19,31 +51,78 @@ jobs:
   attach-assets:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout apk-v0.1.0 (APK source head)
+      - name: Resolve surface tags (inputs win; blank = latest tag)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          resolve() {
+            if [ -n "$2" ]; then echo "$1-v$2"; return; fi
+            gh api "repos/$GITHUB_REPOSITORY/tags?per_page=100" \
+              -q '.[].name' \
+              | grep -E "^$1-v[0-9]+\.[0-9]+\.[0-9]+$" \
+              | sort -V | tail -n 1 || true
+          }
+          APK_TAG=$(resolve apk '${{ inputs.apk_version }}')
+          WEBAPP_TAG=$(resolve webapp '${{ inputs.webapp_version }}')
+          TUI_TAG=$(resolve tui '${{ inputs.tui_version }}')
+          for pair in "APK_TAG=$APK_TAG" "WEBAPP_TAG=$WEBAPP_TAG" \
+                      "TUI_TAG=$TUI_TAG"; do
+            case "${pair#*=}" in
+              *-v[0-9]*.[0-9]*.[0-9]*) echo "$pair" >> "$GITHUB_ENV" ;;
+              *) echo "tag resolution failed: $pair"; exit 1 ;;
+            esac
+          done
+      - name: Verify resolved tags exist + report the plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for tag in "$APK_TAG" "$WEBAPP_TAG" "$TUI_TAG"; do
+            [ -n "$tag" ] || { echo "empty tag resolution"; exit 1; }
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" \
+              --jq '.ref' >/dev/null \
+              || { echo "tag $tag does not exist"; exit 1; }
+          done
+          {
+            echo "### Release assets — resolved plan"
+            echo "- $APK_TAG <- studysprint.apk (fresh build of the tag head)"
+            echo "- $WEBAPP_TAG <- studysprint-$WEBAPP_TAG.zip"
+            echo "- $TUI_TAG <- studysprint-$TUI_TAG.zip"
+            echo "- dry_run: ${{ inputs.dry_run }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout the apk tag (APK source head)
+        if: ${{ !inputs.dry_run }}
         uses: actions/checkout@v4
         with:
-          ref: apk-v0.1.0
+          ref: ${{ env.APK_TAG }}
           path: apk-src
 
-      - name: Checkout webapp-v0.1.0
+      - name: Checkout the webapp tag
+        if: ${{ !inputs.dry_run }}
         uses: actions/checkout@v4
         with:
-          ref: webapp-v0.1.0
+          ref: ${{ env.WEBAPP_TAG }}
           path: web-src
 
-      - name: Checkout tui-v0.1.0
+      - name: Checkout the tui tag
+        if: ${{ !inputs.dry_run }}
         uses: actions/checkout@v4
         with:
-          ref: tui-v0.1.0
+          ref: ${{ env.TUI_TAG }}
           path: tui-src
 
       - name: Set up JDK 17
+        if: ${{ !inputs.dry_run }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Install Android SDK (platform 34 + build-tools 34.0.0)
+        if: ${{ !inputs.dry_run }}
         run: |
           set -euo pipefail
           mkdir -p /opt/android-sdk/cmdline-tools
@@ -55,35 +134,41 @@ jobs:
           /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Core deps for state generation
+        if: ${{ !inputs.dry_run }}
         run: pip install fsrs genanki
 
       - name: Build the APK (fresh build of the release tag's head)
+        if: ${{ !inputs.dry_run }}
         env:
           ANDROID_SDK_ROOT: /opt/android-sdk
         run: bash apk-src/android/build.sh
 
       - name: Package the webApp bundle + TUI source package
+        if: ${{ !inputs.dry_run }}
         run: |
           set -euo pipefail
-          (cd web-src/web && zip -qr "$GITHUB_WORKSPACE/studysprint-webapp-v0.1.0.zip" .)
-          (cd tui-src && zip -qr "$GITHUB_WORKSPACE/studysprint-tui-v0.1.0.zip" \
+          (cd web-src/web && zip -qr "$GITHUB_WORKSPACE/studysprint-$WEBAPP_TAG.zip" .)
+          (cd tui-src && zip -qr "$GITHUB_WORKSPACE/studysprint-$TUI_TAG.zip" \
             . -i "*.py" "VERSION" "TUI.md" "README.md" "requirements.txt" "examples/*" \
                "foundation/*.py" "tools/*.py" "tests/*.py" "web/build_data.py")
           ls -la ./*.zip apk-src/android/studysprint.apk
 
       - name: Upload assets to the three releases
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release upload apk-v0.1.0 apk-src/android/studysprint.apk \
+          gh release upload "$APK_TAG" apk-src/android/studysprint.apk \
             --repo "$GITHUB_REPOSITORY"
-          gh release upload webapp-v0.1.0 studysprint-webapp-v0.1.0.zip \
+          gh release upload "$WEBAPP_TAG" "studysprint-$WEBAPP_TAG.zip" \
             --repo "$GITHUB_REPOSITORY"
-          gh release upload tui-v0.1.0 studysprint-tui-v0.1.0.zip \
+          gh release upload "$TUI_TAG" "studysprint-$TUI_TAG.zip" \
             --repo "$GITHUB_REPOSITORY"
           {
-            echo "### Release assets attached (#4213)"
-            echo "- apk-v0.1.0 <- studysprint.apk (fresh build of the tag head)"
-            sha256sum apk-src/android/studysprint.apk studysprint-webapp-v0.1.0.zip studysprint-tui-v0.1.0.zip
+            echo "### Release assets attached"
+            echo "- $APK_TAG <- studysprint.apk (fresh build of the tag head)"
+            echo "- $WEBAPP_TAG <- studysprint-$WEBAPP_TAG.zip"
+            echo "- $TUI_TAG <- studysprint-$TUI_TAG.zip"
+            sha256sum apk-src/android/studysprint.apk "studysprint-$WEBAPP_TAG.zip" "studysprint-$TUI_TAG.zip"
           } >> "$GITHUB_STEP_SUMMARY"
