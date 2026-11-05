@@ -156,6 +156,14 @@ jobs:
               cp src/android/studysprint.apk "$GITHUB_WORKSPACE/studysprint.apk"
               ;;
             webapp)
+              # The web bundle carries a generated state receipt
+              # whose surface_version is read from web/VERSION.
+              # Rebuild from this exact tag before packaging so the
+              # shipped receipt, footer and service-worker cache all
+              # identify the same release (not the previous tag's
+              # committed state.json).
+              python3 -m pip install --disable-pip-version-check -q fsrs genanki
+              (cd src && python3 web/build_data.py)
               (cd src/web && zip -qr "$GITHUB_WORKSPACE/studysprint-webapp-v$VERSION.zip" .)
               ;;
             tui)
